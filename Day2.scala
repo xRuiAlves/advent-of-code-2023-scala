@@ -23,8 +23,10 @@ object Day2 {
       greenCubes <= MaxGreenCubes &&
       blueCubes <= MaxBlueCubes
     )
-  }
 
+    final val power: Int = redCubes * greenCubes * blueCubes
+  }
+  
   final case class CubeInfo(color: String, count: Int)
 
   def main(args: Array[String]): Unit = {
@@ -36,7 +38,13 @@ object Day2 {
       .map(_.id)
       .sum
 
+    val part2 = input
+      .map(parseGame)
+      .map(_.power)
+      .sum
+
     println(s"Part 1: $part1")
+    println(s"Part 2: $part2")
   }
 
   def parseGame(game: String): Game = Game(
