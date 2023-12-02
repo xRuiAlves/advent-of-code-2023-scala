@@ -5,8 +5,6 @@
 
 import util.ResourceUtils.readResourceLines
 
-import scala.collection.mutable
-
 object Day2 {
   val MaxRedCubes = 12
   val MaxGreenCubes = 13
@@ -26,7 +24,7 @@ object Day2 {
 
     final val power: Int = redCubes * greenCubes * blueCubes
   }
-  
+
   final case class CubeInfo(color: String, count: Int)
 
   def main(args: Array[String]): Unit = {
