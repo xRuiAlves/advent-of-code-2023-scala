@@ -18,8 +18,8 @@ object Day2 {
 
     final val isValid: Boolean = (
       redCubes <= MaxRedCubes &&
-      greenCubes <= MaxGreenCubes &&
-      blueCubes <= MaxBlueCubes
+        greenCubes <= MaxGreenCubes &&
+        blueCubes <= MaxBlueCubes
     )
 
     final val power: Int = redCubes * greenCubes * blueCubes
@@ -47,8 +47,12 @@ object Day2 {
 
   def parseGame(game: String): Game = Game(
     game.split(": ").head.split(" ").last.toInt,
-    game.split(": ").last.split("; ").map(_.split(", ").map {
-      case s"$count $color" => CubeInfo(color, count.toInt)
-    })
+    game
+      .split(": ")
+      .last
+      .split("; ")
+      .map(_.split(", ").map { case s"$count $color" =>
+        CubeInfo(color, count.toInt)
+      })
   )
 }
