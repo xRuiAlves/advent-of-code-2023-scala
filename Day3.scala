@@ -26,8 +26,8 @@ object Day3 {
 
     def floodFillDigitsToEmpty(i: Int, j: Int): Unit = if (isInBounds(i, j) && getValue(i, j).isDigit) {
       matrix(i)(j) = EmptySpace
-      getNeighbours(i, j).foreach {
-        case (neighborI, neighborJ) => floodFillDigitsToEmpty(neighborI, neighborJ)
+      getNeighbours(i, j).foreach { case (neighborI, neighborJ) =>
+        floodFillDigitsToEmpty(neighborI, neighborJ)
       }
     }
 
@@ -41,7 +41,7 @@ object Day3 {
       (i, j + 1),
       (i + 1, j - 1),
       (i + 1, j),
-      (i + 1, j + 1),
+      (i + 1, j + 1)
     )
 
     def hasSymbolNeighbor(i: Int, j: Int): Boolean = getNeighbours(i, j).exists {
@@ -51,27 +51,30 @@ object Day3 {
       }
     }
 
-    def getPartNumber(i: Int, j: Int): Int = if (!getValue(i, j).isDigit) 0 else {
-      val isPartNumber = matrix(i).zipWithIndex.drop(j).takeWhile(_._1.isDigit).map(_._2).exists(digitJ =>
-        hasSymbolNeighbor(i, digitJ)
-      )
+    def getPartNumber(i: Int, j: Int): Int = if (!getValue(i, j).isDigit) 0
+    else {
+      val isPartNumber =
+        matrix(i).zipWithIndex.drop(j).takeWhile(_._1.isDigit).map(_._2).exists(digitJ => hasSymbolNeighbor(i, digitJ))
 
       val partNumber = if (isPartNumber) parseNumber(i, j) else 0
 
       if (isPartNumber) {
-        matrix(i).zipWithIndex.drop(j).takeWhile(_._1.isDigit).map(_._2).foreach(digitJ =>
-          numbers((i, digitJ)) = Number(partNumber, (i, j))
-        )
+        matrix(i).zipWithIndex
+          .drop(j)
+          .takeWhile(_._1.isDigit)
+          .map(_._2)
+          .foreach(digitJ => numbers((i, digitJ)) = Number(partNumber, (i, j)))
       }
 
       floodFillDigitsToEmpty(i, j)
       partNumber
     }
 
-    def getGearValue(i: Int, j: Int): Long = if (getValue(i, j) != Gear) 0 else {
+    def getGearValue(i: Int, j: Int): Long = if (getValue(i, j) != Gear) 0
+    else {
       val neighborNumbers = getNeighbours(i, j)
-        .map {
-          case (neighborI, neighborJ) => numbers.get((neighborI, neighborJ))
+        .map { case (neighborI, neighborJ) =>
+          numbers.get((neighborI, neighborJ))
         }
         .filter(_.isDefined)
         .map(_.get)
