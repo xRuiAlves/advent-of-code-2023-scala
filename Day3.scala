@@ -11,8 +11,8 @@ object Day3 {
 
   final case class Number(value: Int, start: Coord2D)
 
-  final val EMPTY_SPACE = '.'
-  final val GEAR = '*'
+  final val EmptySpace = '.'
+  final val Gear = '*'
 
   def main(args: Array[String]): Unit = {
     val matrix = readResourceLines("day3.txt").map(_.toCharArray)
@@ -22,10 +22,10 @@ object Day3 {
       i >= 0 && j >= 0 && i < matrix.length && j < matrix(i).length
     }
 
-    def getValue(i: Int, j: Int): Char = if (isInBounds(i, j)) matrix(i)(j) else EMPTY_SPACE
+    def getValue(i: Int, j: Int): Char = if (isInBounds(i, j)) matrix(i)(j) else EmptySpace
 
     def floodFillDigitsToEmpty(i: Int, j: Int): Unit = if (isInBounds(i, j) && getValue(i, j).isDigit) {
-      matrix(i)(j) = EMPTY_SPACE
+      matrix(i)(j) = EmptySpace
       getNeighbours(i, j).foreach {
         case (neighborI, neighborJ) => floodFillDigitsToEmpty(neighborI, neighborJ)
       }
@@ -47,7 +47,7 @@ object Day3 {
     def hasSymbolNeighbor(i: Int, j: Int): Boolean = getNeighbours(i, j).exists {
       case (neighborI, neighborJ) => {
         val neighbor = getValue(neighborI, neighborJ)
-        !neighbor.isDigit && neighbor != EMPTY_SPACE
+        !neighbor.isDigit && neighbor != EmptySpace
       }
     }
 
@@ -68,7 +68,7 @@ object Day3 {
       partNumber
     }
 
-    def getGearValue(i: Int, j: Int): Long = if (getValue(i, j) != GEAR) 0 else {
+    def getGearValue(i: Int, j: Int): Long = if (getValue(i, j) != Gear) 0 else {
       val neighborNumbers = getNeighbours(i, j)
         .map {
           case (neighborI, neighborJ) => numbers.get((neighborI, neighborJ))
@@ -81,23 +81,17 @@ object Day3 {
       else 0
     }
 
-    var part1 = 0
-    for (
+    val partNumbers = for (
       i <- matrix.indices;
       j <- matrix(i).indices
-    ) {
-      part1 += getPartNumber(i, j)
-    }
+    ) yield getPartNumber(i, j)
 
-    var part2 = 0L
-    for (
+    val gearValues = for (
       i <- matrix.indices;
       j <- matrix(i).indices
-    ) {
-      part2 += getGearValue(i, j)
-    }
+    ) yield getGearValue(i, j)
 
-    println(s"Part 1: $part1")
-    println(s"Part 2: $part2")
+    println(s"Part 1: ${partNumbers.sum}")
+    println(s"Part 2: ${gearValues.sum}")
   }
 }
