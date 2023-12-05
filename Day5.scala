@@ -11,7 +11,8 @@ import scala.collection.mutable
 object Day5 {
   final case class Mapping(destinationRange: Long, sourceRange: Long, rangeLength: Long) {
     def getMappedValueReverse(destination: Long): Option[Long] =
-      if (destination >= destinationRange && destination < (destinationRange + rangeLength)) Some(sourceRange + (destination - destinationRange))
+      if (destination >= destinationRange && destination < (destinationRange + rangeLength))
+        Some(sourceRange + (destination - destinationRange))
       else None
   }
 
@@ -20,15 +21,17 @@ object Day5 {
 
     val inputGroups = input.mkString("\n").split("\n\n")
     val seeds = parseSeeds(inputGroups.head)
-    val mappingsGroups = inputGroups.drop(1).map(parseMappings).reverse
+    val reverseMappingsGroups = inputGroups.drop(1).map(parseMappings).reverse
 
-    val part1 = findSeed(mappingsGroups, seeds.map(seed => (seed, seed)))
-    val part2 = findSeed(mappingsGroups, seeds
-      .grouped(2)
-      .map {
-        case Array(seedSource, seedLength) => (seedSource, seedSource + seedLength - 1)
-      }
-      .toArray
+    val part1 = findSeed(reverseMappingsGroups, seeds.map(seed => (seed, seed)))
+    val part2 = findSeed(
+      reverseMappingsGroups,
+      seeds
+        .grouped(2)
+        .map { case Array(seedSource, seedLength) =>
+          (seedSource, seedSource + seedLength - 1)
+        }
+        .toArray
     )
 
     println(s"Part 1: $part1")
@@ -43,19 +46,19 @@ object Day5 {
     .split("\n")
     .drop(1)
     .map(parseMappingLine)
-    .map {
-      case Array(destinationRange, sourceRange, rangeLength) => Mapping(destinationRange, sourceRange, rangeLength)
+    .map { case Array(destinationRange, sourceRange, rangeLength) =>
+      Mapping(destinationRange, sourceRange, rangeLength)
     }
 
-  def findSeedFromLocation(location: Long, mappingsGroups: Array[Array[Mapping]]): Long =
-    mappingsGroups.foldLeft(location)((value, mappingsGroup) =>
-      mappingsGroup.map(mapping => mapping.getMappedValueReverse(value)).find(_.isDefined).flatten.getOrElse(value)
+  def findSeedFromLocation(location: Long, reverseMappingsGroups: Array[Array[Mapping]]): Long =
+    reverseMappingsGroups.foldLeft(location)((value, reverseMappingsGroup) =>
+      reverseMappingsGroup.map(mapping => mapping.getMappedValueReverse(value)).find(_.isDefined).flatten.getOrElse(value)
     )
 
   @tailrec
-  def findSeed(mappingsGroups: Array[Array[Mapping]], seedRanges: Array[(Long, Long)], location: Long = 0L): Long = {
-    val maybeSeed = findSeedFromLocation(location, mappingsGroups)
+  def findSeed(reverseMappingsGroups: Array[Array[Mapping]], seedRanges: Array[(Long, Long)], location: Long = 0L): Long = {
+    val maybeSeed = findSeedFromLocation(location, reverseMappingsGroups)
     if (seedRanges.exists((from, to) => maybeSeed >= from && maybeSeed <= to)) location
-    else findSeed(mappingsGroups, seedRanges, location + 1)
+    else findSeed(reverseMappingsGroups, seedRanges, location + 1)
   }
 }
