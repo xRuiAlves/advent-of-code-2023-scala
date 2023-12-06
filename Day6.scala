@@ -18,9 +18,8 @@ object Day6 {
 
     val part1 = times
       .zip(distances)
-      .map {
-        case (time, distanceToBeat) => numWaysToBeatRace(time, distanceToBeat)
-      }.product
+      .map { case (time, distanceToBeat) => numWaysToBeatRace(time, distanceToBeat) }
+      .product
     val part2 = numWaysToBeatRace(timeTotalRace, distanceTotalRace)
 
     println(s"Part 1: $part1")
@@ -34,5 +33,11 @@ object Day6 {
   @tailrec
   def numWaysToBeatRace(raceTime: Long, distanceToBeat: Long, initialHold: Long = 1L, numWaysAcc: Long = 0L): Long =
     if (initialHold == raceTime) numWaysAcc
-    else numWaysToBeatRace(raceTime, distanceToBeat, initialHold + 1, numWaysAcc + (if ((raceTime - initialHold) * initialHold > distanceToBeat) 1L else 0L))
+    else
+      numWaysToBeatRace(
+        raceTime,
+        distanceToBeat,
+        initialHold + 1,
+        numWaysAcc + (if ((raceTime - initialHold) * initialHold > distanceToBeat) 1L else 0L)
+      )
 }
