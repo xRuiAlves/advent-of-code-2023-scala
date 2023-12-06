@@ -3,18 +3,15 @@
 //> using file util/ResourceUtils.scala
 //> using resourceDir inputs
 
-import Day4.Card.parseNumbersStr
 import util.ResourceUtils.readResourceLines
-
-import scala.collection.mutable
 
 object Day4 {
 
   final case class Card(private val cardStr: String) {
     final val numMatchingNumbers = {
       val numberGroups = cardStr.split(": ").last.split(" \\| ")
-      val winningNumbers = parseNumbersStr(numberGroups.head)
-      val myNumbers = parseNumbersStr(numberGroups.last)
+      val winningNumbers = Card.parseNumbersStr(numberGroups.head)
+      val myNumbers = Card.parseNumbersStr(numberGroups.last)
       myNumbers.count(num => winningNumbers.contains(num))
     }
 
