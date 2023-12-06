@@ -4,9 +4,7 @@
 //> using resourceDir inputs
 
 import util.ResourceUtils.readResourceLines
-
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 object Day5 {
   final case class Mapping(destinationRange: Long, sourceRange: Long, rangeLength: Long) {
@@ -52,11 +50,19 @@ object Day5 {
 
   def findSeedFromLocation(location: Long, reverseMappingsGroups: Array[Array[Mapping]]): Long =
     reverseMappingsGroups.foldLeft(location)((value, reverseMappingsGroup) =>
-      reverseMappingsGroup.map(mapping => mapping.getMappedValueReverse(value)).find(_.isDefined).flatten.getOrElse(value)
+      reverseMappingsGroup
+        .map(mapping => mapping.getMappedValueReverse(value))
+        .find(_.isDefined)
+        .flatten
+        .getOrElse(value)
     )
 
   @tailrec
-  def findSeed(reverseMappingsGroups: Array[Array[Mapping]], seedRanges: Array[(Long, Long)], location: Long = 0L): Long = {
+  def findSeed(
+      reverseMappingsGroups: Array[Array[Mapping]],
+      seedRanges: Array[(Long, Long)],
+      location: Long = 0L
+  ): Long = {
     val maybeSeed = findSeedFromLocation(location, reverseMappingsGroups)
     if (seedRanges.exists((from, to) => maybeSeed >= from && maybeSeed <= to)) location
     else findSeed(reverseMappingsGroups, seedRanges, location + 1)
