@@ -5,8 +5,6 @@
 
 import util.ResourceUtils.readResourceLines
 
-import scala.annotation.tailrec
-
 object Day7 {
 
   class Hand(private val handStr: String) extends Ordered[Hand] {
