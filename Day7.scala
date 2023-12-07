@@ -17,10 +17,9 @@ object Day7 {
     val handType: Int = {
       if (cardCounts.size == 1) 7
       else if (cardCounts.values.exists(_ == 4)) 6
-      else if (cardCounts.values.exists(_ == 3)) {
+      else if (cardCounts.values.exists(_ == 3))
         if (cardCounts.values.exists(_ == 2)) 5
         else 4
-      }
       else if (cardCounts.values.count(_ == 2) == 2) 3
       else if (cardCounts.values.count(_ == 2) == 1) 2
       else 1
@@ -39,12 +38,9 @@ object Day7 {
       .map(Hand.fromStr)
       .sortWith(compareHands)
 
-    val part1 = hands
-      .zipWithIndex
-      .map {
-        case (hand, rank) => (rank + 1) * hand.value
-      }
-      .sum
+    val part1 = hands.zipWithIndex.map { case (hand, rank) =>
+      (rank + 1) * hand.value
+    }.sum
     val part2 = 0
 
     println(s"Part 1: $part1")
@@ -53,12 +49,12 @@ object Day7 {
 
   def compareHands(hand1: Hand, hand2: Hand): Boolean = {
     if (hand1.handType != hand2.handType) hand1.handType < hand2.handType
-    else hand1
-      .cards
-      .zip(hand2.cards)
-      .dropWhile((hand1card, hand2card) => hand1card == hand2card)
-      .head match {
-      case (hand1card, hand2card) => Cards.indexOf(hand1card) < Cards.indexOf(hand2card)
-    }
+    else
+      hand1.cards
+        .zip(hand2.cards)
+        .dropWhile((hand1card, hand2card) => hand1card == hand2card)
+        .head match {
+        case (hand1card, hand2card) => Cards.indexOf(hand1card) < Cards.indexOf(hand2card)
+      }
   }
 }
