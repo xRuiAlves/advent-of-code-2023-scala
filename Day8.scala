@@ -13,9 +13,7 @@ object Day8 {
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day8.txt")
 
-    val instructions = input
-      .head
-      .toCharArray
+    val instructions = input.head.toCharArray
       .map(instruction => "LR".indexOf(instruction))
 
     val map = input
@@ -33,12 +31,12 @@ object Day8 {
       else findDestination(map(curr)(instructions(steps % instructions.length)), destinationSuffix, steps + 1)
 
     val part1 = findDestination("AAA", "ZZZ")
-    val part2 = lcm(map
-      .keys
-      .filter(_.last == 'A')
-      .map(node => findDestination(node, "Z"))
-      .map(_.toLong)
-      .toArray
+    val part2 = lcm(
+      map.keys
+        .filter(_.last == 'A')
+        .map(node => findDestination(node, "Z"))
+        .map(_.toLong)
+        .toArray
     )
 
     println(s"Part 1: $part1")
