@@ -16,7 +16,10 @@ object Day9 {
       .map(findExtrapolatedValue)
       .map(_.last)
       .sum
-    val part2 = 0
+    val part2 = input
+      .map(findExtrapolatedValue2)
+      .map(_.head)
+      .sum
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -26,7 +29,13 @@ object Day9 {
 
   def findExtrapolatedValue(sequence: Array[Int]): Array[Int] = if (sequence.forall(_ == 0)) sequence.appended(0) else {
     val diffs = sequence.sliding(2).map(pair => pair.last - pair.head).toArray
-    val next = findExtrapolatedValue(diffs)
-    sequence.appended(sequence.last + next.last)
+    val diff = findExtrapolatedValue(diffs).last
+    sequence.appended(sequence.last + diff)
+  }
+
+  def findExtrapolatedValue2(sequence: Array[Int]): Array[Int] = if (sequence.forall(_ == 0)) sequence.appended(0) else {
+    val diffs = sequence.sliding(2).map(pair => pair.last - pair.head).toArray
+    val diff = findExtrapolatedValue2(diffs).head
+    Array(sequence.head - diff).appendedAll(sequence)
   }
 }
