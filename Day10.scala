@@ -31,10 +31,14 @@ object Day10 {
     val startX = map(startY).indexOf('S')
     val start = Coord2D(startX, startY)
 
-    val startIsLeftConnected = map(startY).indices.contains(startX - 1) && Array('-', 'L', 'F').contains(map(startY)(startX - 1))
-    val startIsRightConnected = map(startY).indices.contains(startX + 1) && Array('-', '7', 'J').contains(map(startY)(startX + 1))
-    val startIsAboveConnected = map.indices.contains(startY - 1) && Array('|', '7', 'F').contains(map(startY - 1)(startX))
-    val startIsBelowConnected = map.indices.contains(startY + 1) && Array('|', 'J', 'L').contains(map(startY + 1)(startX))
+    val startIsLeftConnected =
+      map(startY).indices.contains(startX - 1) && Array('-', 'L', 'F').contains(map(startY)(startX - 1))
+    val startIsRightConnected =
+      map(startY).indices.contains(startX + 1) && Array('-', '7', 'J').contains(map(startY)(startX + 1))
+    val startIsAboveConnected =
+      map.indices.contains(startY - 1) && Array('|', '7', 'F').contains(map(startY - 1)(startX))
+    val startIsBelowConnected =
+      map.indices.contains(startY + 1) && Array('|', 'J', 'L').contains(map(startY + 1)(startX))
 
     map(startY)(startX) =
       if (startIsLeftConnected && startIsAboveConnected) 'J'
@@ -48,10 +52,11 @@ object Day10 {
     @tailrec
     def traverse(curr: Coord2D, prev: Coord2D, distance: Int): Int = {
       path.addOne(curr)
-      {
-        if (curr == start && distance > 1) distance
-        else {
-          traverse(map(curr.y)(curr.x) match {
+
+      if (curr == start && distance > 1) distance
+      else
+        traverse(
+          map(curr.y)(curr.x) match {
             case '|' =>
               if (curr.isAboveOf(prev)) curr.getAbove
               else curr.getBelow
@@ -70,18 +75,20 @@ object Day10 {
             case 'F' =>
               if (curr.isAboveOf(prev)) curr.getRight
               else curr.getBelow
-          }, curr, distance + 1)
-        }
-      }
+          },
+          curr,
+          distance + 1
+        )
     }
 
     @tailrec
     def countTopConnectedVerticalPipesOnTheLeft(coord: Coord2D, count: Int = 0): Int = {
       if (coord.x < 0) count
-      else countTopConnectedVerticalPipesOnTheLeft(
-        coord.getLeft,
-        count + TopConnectedVerticalPipes.count(_ == map(coord.y)(coord.x))
-      )
+      else
+        countTopConnectedVerticalPipesOnTheLeft(
+          coord.getLeft,
+          count + TopConnectedVerticalPipes.count(_ == map(coord.y)(coord.x))
+        )
     }
 
     def isInBounds(coord: Coord2D): Boolean = countTopConnectedVerticalPipesOnTheLeft(coord) % 2 == 1
@@ -104,7 +111,7 @@ object Day10 {
     ) / 2
 
     cleanupMap()
-    
+
     val part2 = (for (y <- map.indices; x <- map(y).indices) yield Coord2D(x, y))
       .filterNot(path.contains)
       .count(isInBounds)
