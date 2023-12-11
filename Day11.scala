@@ -13,10 +13,26 @@ object Day11 {
 
   private[this] final val Galaxy = '#'
 
+  case class BfsNode(coord: Coord2D, distance: Int)
+
+  case class Distance(from: Coord2D, to: Coord2D, distance: Int) {
+    private lazy val minRow = math.min(from._1, to._1)
+    private lazy val maxRow = math.max(from._1, to._1)
+    private lazy val minCol = math.min(from._2, to._2)
+    private lazy val maxCol = math.max(from._2, to._2)
+
+    def expandedValue(emptyRows: Array[Int], emptyCols: Array[Int], expansionFactor: Int): Long = {
+      val emptyRowDiff = emptyRows.count(row => row > minRow && row < maxRow).toLong
+      val emptyColDiff = emptyCols.count(col => col > minCol && col < maxCol).toLong
+      distance + expansionFactor * (emptyRowDiff + emptyColDiff)
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day11.txt")
-    val rawUniverse = input.map(_.toCharArray)
-    val universe = expandUniverse(rawUniverse)
+    val universe = input.map(_.toCharArray)
+    val emptyRows = getEmptyLineIndices(universe)
+    val emptyCols = getEmptyLineIndices(universe.transpose)
 
     val galaxies = (for {
       i <- universe.indices
@@ -26,28 +42,27 @@ object Day11 {
       else None
     }).filter(_.isDefined).map(_.get)
 
-    val part1 = galaxies
-      .map(galaxy => bfs(universe, galaxy, galaxies.toSet.filter(_ != galaxy)))
-      .sum / 2
-    val part2 = 0
+    val distances = galaxies.map(galaxy => bfs(universe, galaxy, galaxies.toSet.filter(_ != galaxy))).toArray
+
+    val part1 = getExpandedDistancesValue(distances, emptyRows, emptyCols, 1)
+    val part2 = getExpandedDistancesValue(distances, emptyRows, emptyCols, 1000000 - 1)
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
   }
 
-  def isEmpty(galaxyLine: Array[Char]): Boolean = !galaxyLine.contains(Galaxy)
+  def getExpandedDistancesValue(
+      distances: Array[Array[Distance]],
+      emptyRows: Array[Int],
+      emptyCols: Array[Int],
+      expansionFactor: Int
+  ): Long = distances
+    .map(_.map(distance => distance.expandedValue(emptyRows, emptyCols, expansionFactor)).sum)
+    .sum / 2
 
-  def expandUniverseVertically(universe: Mat2D): Mat2D = universe.flatMap { row =>
-    if (isEmpty(row)) Array(row, row.clone())
-    else Array(row)
-  }
-
-  def expandUniverse(universe: Mat2D): Mat2D = expandUniverseVertically(expandUniverseVertically(universe).transpose).transpose
-
-  case class BfsNode(coord: Coord2D, distance: Int) {
-    override def equals(obj: Any): Boolean = coord.equals(obj)
-    override def hashCode(): Int = coord.hashCode()
-  }
+  def getEmptyLineIndices(galaxy: Mat2D): Array[Int] = galaxy.zipWithIndex
+    .filter(line => !line._1.contains(Galaxy))
+    .map(_._2)
 
   def isInBounds(universe: Mat2D, coord: Coord2D): Boolean =
     coord._1 >= 0 && coord._2 >= 0 && coord._1 < universe.length && coord._2 < universe(coord._1).length
@@ -59,8 +74,8 @@ object Day11 {
     (coord._1, coord._2 + 1)
   ).filter(coord => isInBounds(universe, coord))
 
-  def bfs(universe: Mat2D, origin: Coord2D, destinations: Set[Coord2D]): Int = {
-    var distance = 0
+  def bfs(universe: Mat2D, origin: Coord2D, destinations: Set[Coord2D]): Array[Distance] = {
+    val distances = mutable.ArrayBuffer[Distance]()
     val visited = mutable.Set[Coord2D]()
     val toVisit = mutable.Queue[BfsNode]()
 
@@ -73,13 +88,13 @@ object Day11 {
         visited.addOne(curr.coord)
 
         if (destinations.contains(curr.coord)) {
-          distance += curr.distance
+          distances.addOne(Distance(origin, curr.coord, curr.distance))
         }
 
         toVisit.enqueueAll(getNeighbors(universe, curr.coord).map(neighbor => BfsNode(neighbor, curr.distance + 1)))
       }
     }
 
-    distance
+    distances.toArray
   }
 }
