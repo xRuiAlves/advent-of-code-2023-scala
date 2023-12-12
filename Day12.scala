@@ -20,25 +20,34 @@ object Day12 {
     val cache = mutable.Map[(String, String, Int, Boolean), Long]()
 
     def count(
-      springs: List[Char],
-      groups: List[Int],
-      numRemainingDamagedSpringsInGroup: Int = 0,
-      fillSpringSpace: Boolean = false
+        springs: List[Char],
+        groups: List[Int],
+        numRemainingDamagedSpringsInGroup: Int = 0,
+        fillSpringSpace: Boolean = false
     ): Long = {
-      val cacheKey = (springs.mkString(CacheKeySeparator), groups.mkString(CacheKeySeparator), numRemainingDamagedSpringsInGroup, fillSpringSpace)
+      val cacheKey = (
+        springs.mkString(CacheKeySeparator),
+        groups.mkString(CacheKeySeparator),
+        numRemainingDamagedSpringsInGroup,
+        fillSpringSpace
+      )
       cache.get(cacheKey) match {
         case Some(cached) => cached
         case None => {
           val thisCount = (springs, groups, numRemainingDamagedSpringsInGroup, fillSpringSpace) match {
             case (Nil, Nil, 0, _) => 1
-            case (Unknown :: springsT, group :: groupsT, 0, false) => count(springsT, groupsT, group - 1, (group - 1) == 0) +
-              count(springsT, groups, 0, false)
+            case (Unknown :: springsT, group :: groupsT, 0, false) =>
+              count(springsT, groupsT, group - 1, (group - 1) == 0) +
+                count(springsT, groups, 0, false)
             case (Unknown :: springsT, Nil, 0, false) => count(springsT, groups, 0, false)
-            case (Unknown :: springsT, _, 0, true) => count(springsT, groups, 0, false)
-            case (Operational :: springsT, _, 0, _) => count(springsT, groups, 0, false)
-            case (Damaged :: springsT, group :: groupsT, 0, false) => count(springsT, groupsT, group - 1, (group - 1) == 0)
-            case (Unknown :: springsT, _, numRemaining, false) => count(springsT, groups, numRemaining - 1, (numRemaining - 1) == 0)
-            case (Damaged :: springsT, _, numRemaining, false) => count(springsT, groups, numRemaining - 1, (numRemaining - 1) == 0)
+            case (Unknown :: springsT, _, 0, true)    => count(springsT, groups, 0, false)
+            case (Operational :: springsT, _, 0, _)   => count(springsT, groups, 0, false)
+            case (Damaged :: springsT, group :: groupsT, 0, false) =>
+              count(springsT, groupsT, group - 1, (group - 1) == 0)
+            case (Unknown :: springsT, _, numRemaining, false) =>
+              count(springsT, groups, numRemaining - 1, (numRemaining - 1) == 0)
+            case (Damaged :: springsT, _, numRemaining, false) =>
+              count(springsT, groups, numRemaining - 1, (numRemaining - 1) == 0)
             case _ => 0L
           }
           cache(cacheKey) = thisCount
