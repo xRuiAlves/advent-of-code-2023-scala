@@ -33,16 +33,13 @@ object Day13 {
     if (i1 < 0 || i2 >= lines.length) smudges
     else countSmudges(lines, i1 - 1, i2 + 1, smudges + countDifferences(lines(i1), lines(i2)))
 
-  def findSymmetry(lines: Array[String], smudgeCount: Int): Option[Int] = lines
-    .indices
+  def findSymmetry(lines: Array[String], smudgeCount: Int): Option[Int] = lines.indices
     .sliding(2)
     .find { case IndexedSeq(i1, i2) => countSmudges(lines, i1, i2) == smudgeCount }
     .map(_.last)
 
   case class Map(rows: Array[String], cols: Array[String]) {
-    def getSummaryValue(smudgeCount: Int): Int = (
-      findSymmetry(rows, smudgeCount).map(_ * 100).getOrElse(0) +
+    def getSummaryValue(smudgeCount: Int): Int = findSymmetry(rows, smudgeCount).map(_ * 100).getOrElse(0) +
       findSymmetry(cols, smudgeCount).getOrElse(0)
-    )
   }
 }
