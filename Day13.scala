@@ -13,8 +13,8 @@ object Day13 {
     val matrices = input.mkString("\n").split("\n\n")
     val maps = matrices.map(parseMap)
 
-    val part1 = maps.map(_.summaryValue).sum
-    val part2 = 0
+    val part1 = maps.map(_.getSummaryValue(0)).sum
+    val part2 = maps.map(_.getSummaryValue(1)).sum
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -26,21 +26,23 @@ object Day13 {
     Map(rows, cols)
   }
 
-  @tailrec
-  def hasSymmetry(lines: Array[String], i1: Int, i2: Int): Boolean =
-    if (i1 < 0 || i2 >= lines.length) true
-    else if (lines(i1) != lines(i2)) false
-    else hasSymmetry(lines, i1 - 1, i2 + 1)
+  def countDifferences(line1: String, line2: String): Int = line1.indices.count(i => line1(i) != line2(i))
 
-  def findSymmetry(lines: Array[String]): Option[Int] = lines
+  @tailrec
+  def countSmudges(lines: Array[String], i1: Int, i2: Int, smudges: Int = 0): Int =
+    if (i1 < 0 || i2 >= lines.length) smudges
+    else countSmudges(lines, i1 - 1, i2 + 1, smudges + countDifferences(lines(i1), lines(i2)))
+
+  def findSymmetry(lines: Array[String], smudgeCount: Int): Option[Int] = lines
     .indices
     .sliding(2)
-    .find { case IndexedSeq(i1, i2) => hasSymmetry(lines, i1, i2) }
+    .find { case IndexedSeq(i1, i2) => countSmudges(lines, i1, i2) == smudgeCount }
     .map(_.last)
 
   case class Map(rows: Array[String], cols: Array[String]) {
-    private val rowSymmetry  = findSymmetry(rows)
-    private val colSymmetry = findSymmetry(cols)
-    val summaryValue = rowSymmetry.map(_ * 100).getOrElse(0) +  findSymmetry(cols).getOrElse(0)
+    def getSummaryValue(smudgeCount: Int): Int = (
+      findSymmetry(rows, smudgeCount).map(_ * 100).getOrElse(0) +
+      findSymmetry(cols, smudgeCount).getOrElse(0)
+    )
   }
 }
