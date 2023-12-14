@@ -35,14 +35,16 @@ object Day14 {
     println(s"Part 2: $part2")
   }
 
-  def getLoad(map: Mat2D): Int = map.transpose.map(_.reverse
-    .zipWithIndex
-    .map((cell, i) =>
-      if (cell == RoundRock) i + 1
-      else 0
-    ).
-    sum
-  ).sum
+  def getLoad(map: Mat2D): Int = map.transpose
+    .map(
+      _.reverse.zipWithIndex
+        .map((cell, i) =>
+          if (cell == RoundRock) i + 1
+          else 0
+        )
+        .sum
+    )
+    .sum
 
   def tiltUntilCycle(map: Mat2D): CyclicTiltResult = {
     val visited = mutable.Map[String, Int]()
@@ -68,8 +70,7 @@ object Day14 {
       map(row1)(col1) = RoundRock
       map(row2)(col2) = EmptySpace
       true
-    }
-    else false
+    } else false
   }
 
   def tiltMap(map: Mat2D): Unit = {
@@ -85,8 +86,8 @@ object Day14 {
   def tiltMapNorth(map: Mat2D, col: Int): Unit = {
     var swapped = false
 
-    map.indices.sliding(2).foreach {
-      case IndexedSeq(i1, i2) => swapped ||= swap(map, i1, col, i2, col)
+    map.indices.sliding(2).foreach { case IndexedSeq(i1, i2) =>
+      swapped ||= swap(map, i1, col, i2, col)
     }
 
     if (swapped) tiltMapNorth(map, col)
@@ -98,8 +99,8 @@ object Day14 {
   def tiltMapSouth(map: Mat2D, col: Int): Unit = {
     var swapped = false
 
-    map.indices.reverse.sliding(2).foreach {
-      case IndexedSeq(i1, i2) => swapped ||= swap(map, i1, col, i2, col)
+    map.indices.reverse.sliding(2).foreach { case IndexedSeq(i1, i2) =>
+      swapped ||= swap(map, i1, col, i2, col)
     }
 
     if (swapped) tiltMapSouth(map, col)
@@ -111,8 +112,8 @@ object Day14 {
   def tiltMapWest(map: Mat2D, row: Int): Unit = {
     var swapped = false
 
-    map.head.indices.sliding(2).foreach {
-      case IndexedSeq(i1, i2) => swapped ||= swap(map, row, i1, row, i2)
+    map.head.indices.sliding(2).foreach { case IndexedSeq(i1, i2) =>
+      swapped ||= swap(map, row, i1, row, i2)
     }
 
     if (swapped) tiltMapWest(map, row)
@@ -124,8 +125,8 @@ object Day14 {
   def tiltMapEast(map: Mat2D, row: Int): Unit = {
     var swapped = false
 
-    map.head.indices.reverse.sliding(2).foreach {
-      case IndexedSeq(i1, i2) => swapped ||= swap(map, row, i1, row, i2)
+    map.head.indices.reverse.sliding(2).foreach { case IndexedSeq(i1, i2) =>
+      swapped ||= swap(map, row, i1, row, i2)
     }
 
     if (swapped) tiltMapEast(map, row)
