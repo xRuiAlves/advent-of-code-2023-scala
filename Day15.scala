@@ -14,11 +14,8 @@ object Day15 {
 
   case class Instruction(private val instructionStr: String) {
     val label: String = instructionStr.takeWhile(_.isLetter)
+    val focalLength: Int = instructionStr.filter(_.isDigit).toIntOption.getOrElse(-1)
     val hash: Int = getHash(label)
-
-    val focalLength: Int = instructionStr.filter(_.isDigit) match
-      case focalLengthStr if focalLengthStr.nonEmpty => focalLengthStr.toInt
-      case _ => -1
   }
 
   case class Box(label: String, focalLength: Int)
@@ -29,10 +26,7 @@ object Day15 {
     val instructions = words.map(word => Instruction(word))
 
     val part1 = words.map(getHash).sum
-    val part2 = getBoxes(instructions)
-      .zipWithIndex
-      .map { case (box, boxIdx) => getBoxValue(box, boxIdx) }
-      .sum
+    val part2 = getBoxes(instructions).zipWithIndex.map { case (box, boxIdx) => getBoxValue(box, boxIdx) }.sum
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -55,12 +49,10 @@ object Day15 {
     boxes.map(_.toArray)
   }
 
-  def getHash(word: String): Int = word
-    .toCharArray
+  def getHash(word: String): Int = word.toCharArray
     .foldLeft(0)((acc, curr) => (acc + curr) * ASCII_MULTIPLIER % ASCII_MOD_SPACE)
 
-  def getBoxValue(box: Array[Box], boxIdx: Int): Int = box
-    .zipWithIndex
-    .map { case (boxNode, boxNodeIdx) => (boxIdx + 1) * (boxNodeIdx + 1) * boxNode.focalLength }
-    .sum
+  def getBoxValue(box: Array[Box], boxIdx: Int): Int = box.zipWithIndex.map { case (boxNode, boxNodeIdx) =>
+    (boxIdx + 1) * (boxNodeIdx + 1) * boxNode.focalLength
+  }.sum
 }
