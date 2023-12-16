@@ -12,23 +12,32 @@ object Day16 {
   type Mat2D = Array[Array[Char]]
   type Node = ((Int, Int), Char)
 
-  private[this] final val StartPos = ((0, 0), 'R')
+  private[this] final val Part1StartPos = ((0, 0), 'R')
 
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day16.txt")
     val map = input.map(_.toCharArray)
 
-    val part1 = visit(map)
-    val part2 = 0
+    val part2StartNodes = Array(
+      map.indices.map(i => ((i, 0), 'R')),
+      map.indices.map(i => ((i, map(i).length - 1), 'L')),
+      map.head.indices.map(j => ((0, j), 'D')),
+      map.head.indices.map(j => ((map.length - 1, j), 'U'))
+    ).flatten
+
+    val part1 = visit(map, Part1StartPos)
+    val part2 = part2StartNodes
+      .map(startPos => visit(map, startPos))
+      .max
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
   }
 
-  def visit(map: Mat2D): Int = {
+  def visit(map: Mat2D, startNode: Node): Int = {
     val visited = mutable.Set[Node]()
     val toVisit = mutable.Queue[Node]()
-    toVisit.enqueue(StartPos)
+    toVisit.enqueue(startNode)
 
     while (toVisit.nonEmpty) {
       val curr = toVisit.dequeue()
