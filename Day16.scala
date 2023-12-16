@@ -5,7 +5,6 @@
 
 import util.ResourceUtils.readResourceLines
 
-import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Day16 {
