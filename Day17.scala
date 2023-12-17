@@ -14,16 +14,14 @@ object Day17 {
 
   case class Node(pos: NodePos, straightCount: Int, heatLoss: Int) extends Ordered[Node] {
     def compare(that: Node) = that.heatLoss.compareTo(this.heatLoss)
-
-    def withIncreasedHeatLoss(amount: Int): Node = Node(pos, straightCount, heatLoss + amount)
   }
 
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day17.txt")
     val map = parseMap(input)
 
-    val part1 = visit(map)
-    val part2 = 0
+    val part1 = visitPart1(map)
+    val part2 = visitPart2(map)
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -39,34 +37,40 @@ object Day17 {
     (i == map.length - 1) && (j == map(i).length - 1)
   }
 
-  def getNeighbors(map: Mat2D, node: Node): Array[Node] = (node.pos match {
-    case NodePos(i, j, 'R') => Array(
-      Node(NodePos(i, j + 1, 'R'), node.straightCount + 1, node.heatLoss),
-      Node(NodePos(i - 1, j, 'U'), 1, node.heatLoss),
-      Node(NodePos(i + 1, j, 'D'), 1, node.heatLoss)
-    )
-    case NodePos(i, j, 'L') => Array(
-      Node(NodePos(i, j - 1, 'L'), node.straightCount + 1, node.heatLoss),
-      Node(NodePos(i - 1, j, 'U'), 1, node.heatLoss),
-      Node(NodePos(i + 1, j, 'D'), 1, node.heatLoss)
-    )
-    case NodePos(i, j, 'U') => Array(
-      Node(NodePos(i - 1, j, 'U'), node.straightCount + 1, node.heatLoss),
-      Node(NodePos(i, j + 1, 'R'), 1, node.heatLoss),
-      Node(NodePos(i, j - 1, 'L'), 1, node.heatLoss)
-    )
-    case NodePos(i, j, 'D') => Array(
-      Node(NodePos(i + 1, j, 'D'), node.straightCount + 1, node.heatLoss),
-      Node(NodePos(i, j + 1, 'R'), 1, node.heatLoss),
-      Node(NodePos(i, j - 1, 'L'), 1, node.heatLoss)
-    )
-  })
-    .filter(node => isInBounds(map, node.pos))
-    .filter(node => node.straightCount <= 3)
-    .map(node => node.withIncreasedHeatLoss(map(node.pos.i)(node.pos.j)))
+  def getForwardPos(pos: NodePos): NodePos = pos match {
+    case NodePos(i, j, 'R') => NodePos(i, j + 1, 'R')
+    case NodePos(i, j, 'L') => NodePos(i, j - 1, 'L')
+    case NodePos(i, j, 'U') => NodePos(i - 1, j, 'U')
+    case NodePos(i, j, 'D') => NodePos(i + 1, j, 'D')
+  }
 
+  def getAfterTurningPositions(pos: NodePos): Array[NodePos] = (pos match {
+    case NodePos(i, j, 'R') => Array(NodePos(i, j, 'U'), NodePos(i, j, 'D'))
+    case NodePos(i, j, 'L') => Array(NodePos(i, j, 'U'), NodePos(i, j, 'D'))
+    case NodePos(i, j, 'U') => Array(NodePos(i, j, 'L'), NodePos(i, j, 'R'))
+    case NodePos(i, j, 'D') => Array(NodePos(i, j, 'L'), NodePos(i, j, 'R'))
+  }).map(getForwardPos)
 
-  def visit(map: Mat2D): Int = {
+  def getNeighborsPart1(map: Mat2D, node: Node): mutable.ArrayBuffer[Node] = {
+    val neighbors = mutable.ArrayBuffer[Node]()
+
+    if (node.straightCount < 3) {
+      val newPos = getForwardPos(node.pos)
+      if (isInBounds(map, newPos)) {
+        neighbors.addOne(Node(newPos, node.straightCount + 1, node.heatLoss + map(newPos.i)(newPos.j)))
+      }
+    }
+
+    getAfterTurningPositions(node.pos)
+      .filter(newPos => isInBounds(map, newPos))
+      .foreach(newPos => {
+        neighbors.addOne(Node(newPos, 1, node.heatLoss + map(newPos.i)(newPos.j)))
+      })
+
+    neighbors
+  }
+
+  def visitPart1(map: Mat2D): Int = {
     val visited = mutable.Set[(NodePos, Int)]()
     val toVisit = mutable.PriorityQueue[Node]()
     val startNode = Node(NodePos(0, 0, 'R'), 0, 0)
@@ -83,7 +87,7 @@ object Day17 {
         }
 
         visited.addOne(visitedHash)
-        getNeighbors(map, curr).foreach(node => toVisit.enqueue(node))
+        getNeighborsPart1(map, curr).foreach(node => toVisit.enqueue(node))
       }
     }
 
