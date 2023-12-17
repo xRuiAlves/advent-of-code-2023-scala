@@ -93,4 +93,49 @@ object Day17 {
 
     throw new Error("Path not found!")
   }
+
+  def getNeighborsPart2(map: Mat2D, node: Node): mutable.ArrayBuffer[Node] = {
+    val neighbors = mutable.ArrayBuffer[Node]()
+
+    if (node.straightCount < 10) {
+      val newPos = getForwardPos(node.pos)
+      if (isInBounds(map, newPos)) {
+        neighbors.addOne(Node(newPos, node.straightCount + 1, node.heatLoss + map(newPos.i)(newPos.j)))
+      }
+    }
+
+    if (node.straightCount >= 4) {
+      getAfterTurningPositions(node.pos)
+        .filter(newPos => isInBounds(map, newPos))
+        .foreach(newPos => {
+          neighbors.addOne(Node(newPos, 1, node.heatLoss + map(newPos.i)(newPos.j)))
+        })
+    }
+
+    neighbors
+  }
+
+  def visitPart2(map: Mat2D): Int = {
+    val visited = mutable.Set[(NodePos, Int)]()
+    val toVisit = mutable.PriorityQueue[Node]()
+    val startNode = Node(NodePos(0, 0, 'R'), 0, 0)
+    toVisit.enqueue(startNode)
+
+    while (toVisit.nonEmpty) {
+      val curr = toVisit.dequeue()
+      val visitedHash = (curr.pos, curr.straightCount)
+
+      if (!visited.contains(visitedHash)) {
+
+        if (curr.straightCount >= 4 && isTargetNode(map, curr.pos)) {
+          return curr.heatLoss
+        }
+
+        visited.addOne(visitedHash)
+        getNeighborsPart2(map, curr).foreach(node => toVisit.enqueue(node))
+      }
+    }
+
+    throw new Error("Path not found!")
+  }
 }
