@@ -20,8 +20,8 @@ object Day17 {
     val input = readResourceLines("day17.txt")
     val map = parseMap(input)
 
-    val part1 = visitPart1(map)
-    val part2 = visitPart2(map)
+    val part1 = visit(map, 0, 3)
+    val part2 = visit(map, 4, 10)
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -51,60 +51,17 @@ object Day17 {
     case NodePos(i, j, 'D') => Array(NodePos(i, j, 'L'), NodePos(i, j, 'R'))
   }).map(getForwardPos)
 
-  def getNeighborsPart1(map: Mat2D, node: Node): mutable.ArrayBuffer[Node] = {
+  def getNeighbors(map: Mat2D, node: Node, minStraightCount: Int, maxStraightCount: Int): Array[Node] = {
     val neighbors = mutable.ArrayBuffer[Node]()
 
-    if (node.straightCount < 3) {
+    if (node.straightCount < maxStraightCount) {
       val newPos = getForwardPos(node.pos)
       if (isInBounds(map, newPos)) {
         neighbors.addOne(Node(newPos, node.straightCount + 1, node.heatLoss + map(newPos.i)(newPos.j)))
       }
     }
 
-    getAfterTurningPositions(node.pos)
-      .filter(newPos => isInBounds(map, newPos))
-      .foreach(newPos => {
-        neighbors.addOne(Node(newPos, 1, node.heatLoss + map(newPos.i)(newPos.j)))
-      })
-
-    neighbors
-  }
-
-  def visitPart1(map: Mat2D): Int = {
-    val visited = mutable.Set[(NodePos, Int)]()
-    val toVisit = mutable.PriorityQueue[Node]()
-    val startNode = Node(NodePos(0, 0, 'R'), 0, 0)
-    toVisit.enqueue(startNode)
-
-    while (toVisit.nonEmpty) {
-      val curr = toVisit.dequeue()
-      val visitedHash = (curr.pos, curr.straightCount)
-
-      if (!visited.contains(visitedHash)) {
-
-        if (isTargetNode(map, curr.pos)) {
-          return curr.heatLoss
-        }
-
-        visited.addOne(visitedHash)
-        getNeighborsPart1(map, curr).foreach(node => toVisit.enqueue(node))
-      }
-    }
-
-    throw new Error("Path not found!")
-  }
-
-  def getNeighborsPart2(map: Mat2D, node: Node): mutable.ArrayBuffer[Node] = {
-    val neighbors = mutable.ArrayBuffer[Node]()
-
-    if (node.straightCount < 10) {
-      val newPos = getForwardPos(node.pos)
-      if (isInBounds(map, newPos)) {
-        neighbors.addOne(Node(newPos, node.straightCount + 1, node.heatLoss + map(newPos.i)(newPos.j)))
-      }
-    }
-
-    if (node.straightCount >= 4) {
+    if (node.straightCount >= minStraightCount) {
       getAfterTurningPositions(node.pos)
         .filter(newPos => isInBounds(map, newPos))
         .foreach(newPos => {
@@ -112,10 +69,10 @@ object Day17 {
         })
     }
 
-    neighbors
+    neighbors.toArray
   }
 
-  def visitPart2(map: Mat2D): Int = {
+  def visit(map: Mat2D, minStraightCount: Int, maxStraightCount: Int): Int = {
     val visited = mutable.Set[(NodePos, Int)]()
     val toVisit = mutable.PriorityQueue[Node]()
     val startNode = Node(NodePos(0, 0, 'R'), 0, 0)
@@ -127,12 +84,12 @@ object Day17 {
 
       if (!visited.contains(visitedHash)) {
 
-        if (curr.straightCount >= 4 && isTargetNode(map, curr.pos)) {
+        if (curr.straightCount >= minStraightCount && isTargetNode(map, curr.pos)) {
           return curr.heatLoss
         }
 
         visited.addOne(visitedHash)
-        getNeighborsPart2(map, curr).foreach(node => toVisit.enqueue(node))
+        getNeighbors(map, curr, minStraightCount, maxStraightCount).foreach(node => toVisit.enqueue(node))
       }
     }
 
