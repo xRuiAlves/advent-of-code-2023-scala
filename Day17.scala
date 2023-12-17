@@ -29,12 +29,14 @@ object Day17 {
 
   def parseMap(rawMap: Array[String]): Mat2D = rawMap.map(_.map(digit => digit.toInt - '0').toArray)
 
-  def isInBounds(map: Mat2D, pos: NodePos): Boolean = pos match { case NodePos(i, j, _) =>
-    i >= 0 && j >= 0 && i < map.length && j < map(i).length
+  def isInBounds(map: Mat2D, pos: NodePos): Boolean = pos match {
+    case NodePos(i, j, _) =>
+      i >= 0 && j >= 0 && i < map.length && j < map(i).length
   }
 
-  def isTargetNode(map: Mat2D, pos: NodePos): Boolean = pos match { case NodePos(i, j, _) =>
-    (i == map.length - 1) && (j == map(i).length - 1)
+  def isTargetNode(map: Mat2D, pos: NodePos): Boolean = pos match {
+    case NodePos(i, j, _) =>
+      (i == map.length - 1) && (j == map(i).length - 1)
   }
 
   def getForwardPos(pos: NodePos): NodePos = pos match {
