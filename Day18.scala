@@ -8,54 +8,85 @@ import util.ResourceUtils.readResourceLines
 import scala.collection.mutable
 
 object Day18 {
-  type Coord2D = (Int, Int)
+  type Coord2D = (Long, Long)
+  type Line2D = (Coord2D, Coord2D)
+
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day18.txt")
-    val instructions = parsePaintedInstructions(input)
-    val polygonPart1 = Polygon(getPaintedSquares(instructions.map(_.instruction)))
+    val coloredInstructions = parseColoredInstructions(input)
 
-    val part1 = polygonPart1.area
-    val part2 = 0
+    lazy val part1 = getPolygonAreaFromInstructions(coloredInstructions.map(_.instruction))
+    lazy val part2 = getPolygonAreaFromInstructions(parseInstructionsFromColors(coloredInstructions.map(_.color)))
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
   }
 
-  case class Polygon(points: Array[Coord2D]) {
-    private val shoelaceSum = points.sliding(2).foldLeft(0) {
-      case (sum, Array((x1, y1), (x2, y2))) => sum + x1 * y2 - x2 * y1
-    }
-    val perimeter: Int = points.length
+  case class Polygon(lines: Array[Line2D]) {
+    private val shoelaceSum = lines
+      .map(getPointsFromLine)
+      .map(points => points.sliding(2).foldLeft(0L) {
+        case (sum, IndexedSeq((x1, y1), (x2, y2))) =>
+          sum + x1 * y2 - x2 * y1
+      })
+      .sum
+    val perimeter: Long = lines.map { case ((x1, y1), (x2, y2)) =>
+      math.abs(x2 - x1 + y2 - y1)
+    }.sum
 
-    private val interiorArea = math.abs(shoelaceSum / 2) - perimeter / 2
-    val area: Int = interiorArea + perimeter
+    private val interiorArea = math.abs(shoelaceSum / 2) - perimeter / 2 + 1
+    val area: Long = interiorArea + perimeter
   }
 
   case class Instruction(dir: Char, dist: Int)
 
-  case class ColorInstruction(instruction: Instruction, color: String)
+  case class ColoredInstruction(instruction: Instruction, color: String)
 
-  def parsePaintedInstructions(rawInstructions: Array[String]): Array[ColorInstruction] = rawInstructions.map {
-    case s"$dir $dist ($color)" => ColorInstruction(Instruction(dir.head, dist.toInt), color)
+  def getPolygonAreaFromInstructions(instructions: Array[Instruction]): Long = {
+    Polygon(getPaintedSquareLines(instructions)).area
   }
 
-  def getPaintedSquares(instructions: Array[Instruction]): Array[Coord2D] = {
-    val visited = mutable.ArrayBuffer[Coord2D]()
-    var curr = (0, 0)
-    visited.addOne(curr)
+  def getPointsFromLine(line: Line2D): IndexedSeq[Coord2D] = line match { case ((x1, y1), (x2, y2)) =>
+    val points = for {
+      x <- math.min(x1, x2) to math.max(x1, x2)
+      y <- math.min(y1, y2) to math.max(y1, y2)
+    } yield (x, y)
+
+    if (x2 > x1 || y2 > y1) points
+    else points.reverse
+  }
+
+  def parseColoredInstructions(rawInstructions: Array[String]): Array[ColoredInstruction] = rawInstructions.map {
+    case s"$dir $dist (#$color)" => ColoredInstruction(Instruction(dir.head, dist.toInt), color)
+  }
+
+  def parseInstructionsFromColors(colors: Array[String]): Array[Instruction] = colors.map(color => {
+    val dist = Integer.parseInt(color.dropRight(1), 16)
+    val dir = color.last match {
+      case '0' => 'R'
+      case '1' => 'D'
+      case '2' => 'L'
+      case '3' => 'U'
+      case _ => throw new Error(s"Unexpected direction in color '$color': '${color.last}'")
+    }
+    Instruction(dir, dist)
+  })
+
+  def getPaintedSquareLines(instructions: Array[Instruction]): Array[Line2D] = {
+    val lines = mutable.ArrayBuffer[Line2D]()
+    var curr = (0L, 0L)
 
     instructions.foreach { case Instruction(dir, dist) =>
-      for (_ <- 0 until dist) {
-        curr = (curr, dir) match {
-          case ((i, j), 'R') => (i, j + 1)
-          case ((i, j), 'L') => (i, j - 1)
-          case ((i, j), 'U') => (i - 1, j)
-          case ((i, j), 'D') => (i + 1, j)
-        }
-        visited.addOne(curr)
+      val line = (curr, dir) match {
+        case ((i, j), 'R') => ((i, j), (i, j + dist))
+        case ((i, j), 'L') => ((i, j), (i, j - dist))
+        case ((i, j), 'U') => ((i, j), (i - dist, j))
+        case ((i, j), 'D') => ((i, j), (i + dist, j))
       }
+      curr = line._2
+      lines.addOne(line)
     }
 
-    visited.toArray
+    lines.toArray
   }
 }
