@@ -113,9 +113,9 @@ object Day20 {
     applySequence(modules, None, Some(targetModuleId))
 
   def applySequence(
-    modules: Map[String, Module],
-    numButtonPresses: Option[Int],
-    targetModuleId: Option[String]
+      modules: Map[String, Module],
+      numButtonPresses: Option[Int],
+      targetModuleId: Option[String]
   ): Long = {
     var lowPulses = 0L
     var highPulses = 0L
