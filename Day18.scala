@@ -25,10 +25,11 @@ object Day18 {
   case class Polygon(lines: Array[Line2D]) {
     private val shoelaceSum = lines
       .map(getPointsFromLine)
-      .map(points => points.sliding(2).foldLeft(0L) {
-        case (sum, IndexedSeq((x1, y1), (x2, y2))) =>
+      .map(points =>
+        points.sliding(2).foldLeft(0L) { case (sum, IndexedSeq((x1, y1), (x2, y2))) =>
           sum + x1 * y2 - x2 * y1
-      })
+        }
+      )
       .sum
     val perimeter: Long = lines.map { case ((x1, y1), (x2, y2)) =>
       math.abs(x2 - x1 + y2 - y1)
@@ -46,14 +47,15 @@ object Day18 {
     Polygon(getPaintedSquareLines(instructions)).area
   }
 
-  def getPointsFromLine(line: Line2D): IndexedSeq[Coord2D] = line match { case ((x1, y1), (x2, y2)) =>
-    val points = for {
-      x <- math.min(x1, x2) to math.max(x1, x2)
-      y <- math.min(y1, y2) to math.max(y1, y2)
-    } yield (x, y)
+  def getPointsFromLine(line: Line2D): IndexedSeq[Coord2D] = line match {
+    case ((x1, y1), (x2, y2)) =>
+      val points = for {
+        x <- math.min(x1, x2) to math.max(x1, x2)
+        y <- math.min(y1, y2) to math.max(y1, y2)
+      } yield (x, y)
 
-    if (x2 > x1 || y2 > y1) points
-    else points.reverse
+      if (x2 > x1 || y2 > y1) points
+      else points.reverse
   }
 
   def parseColoredInstructions(rawInstructions: Array[String]): Array[ColoredInstruction] = rawInstructions.map {
@@ -67,7 +69,7 @@ object Day18 {
       case '1' => 'D'
       case '2' => 'L'
       case '3' => 'U'
-      case _ => throw new Error(s"Unexpected direction in color '$color': '${color.last}'")
+      case _   => throw new Error(s"Unexpected direction in color '$color': '${color.last}'")
     }
     Instruction(dir, dist)
   })
