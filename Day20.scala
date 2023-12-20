@@ -11,18 +11,17 @@ import scala.collection.mutable
 
 object Day20 {
   private[this] final val SequenceInitialModule = "broadcaster"
-  private[this] final val SequenceTargetModule = "rx"
+  private[this] final val Part1NumButtonPresses = 1000
+  private[this] final val Part2SequenceTargetModule = "rx"
 
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day20.txt")
 
-    val part1 = applySequencePart1(parseModules(input))
-    val part2 = lcm(Array(
-      applySequencePart2(parseModules(input), "kl"),
-      applySequencePart2(parseModules(input), "vm"),
-      applySequencePart2(parseModules(input), "kv"),
-      applySequencePart2(parseModules(input), "vb")
-    ))
+    val part1 = applySequence(parseModules(input), Part1NumButtonPresses)
+
+    val part2TargetModulePredecessor = findPredecessors(input, Part2SequenceTargetModule).head
+    val part2LcmSinks = findPredecessors(input, part2TargetModulePredecessor)
+    val part2 = lcm(part2LcmSinks.map(sinkModuleId => applySequence(parseModules(input), sinkModuleId)))
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -107,22 +106,36 @@ object Day20 {
     }.toMap
   }
 
-  def applySequencePart1(modules: Map[String, Module]): Int = {
-    var lowPulses = 0
-    var highPulses = 0
+  def applySequence(modules: Map[String, Module], numButtonPresses: Int): Long =
+    applySequence(modules, Some(numButtonPresses), None)
+
+  def applySequence(modules: Map[String, Module], targetModuleId: String): Long =
+    applySequence(modules, None, Some(targetModuleId))
+
+  def applySequence(
+    modules: Map[String, Module],
+    numButtonPresses: Option[Int],
+    targetModuleId: Option[String]
+  ): Long = {
+    var lowPulses = 0L
+    var highPulses = 0L
     val toVisit = mutable.Queue[(String, String, Pulse)]()
 
-    for (_ <- 1 to 1000) {
+    for (buttonPress <- 1 to Int.MaxValue) {
       toVisit.enqueue((SequenceInitialModule, SequenceInitialModule, Pulse.LOW))
 
       while (toVisit.nonEmpty) {
         val (fromModuleId, toModuleId, pulse) = toVisit.dequeue()
 
+        if (targetModuleId.isDefined && fromModuleId == targetModuleId.get && pulse == Pulse.HIGH) {
+          return buttonPress.toLong
+        }
+
         if (pulse == Pulse.LOW) {
-          lowPulses += 1
+          lowPulses += 1L
         }
         if (pulse == Pulse.HIGH) {
-          highPulses += 1
+          highPulses += 1L
         }
 
         if (modules.contains(toModuleId) && pulse != Pulse.NONE) {
@@ -134,44 +147,20 @@ object Day20 {
           })
         }
       }
-    }
 
-    lowPulses * highPulses
-  }
-
-  def applySequencePart2(modules: Map[String, Module], targetModuleId: String): Long = {
-    var lowPulses = 0
-    var highPulses = 0
-    val toVisit = mutable.Queue[(String, String, Pulse)]()
-
-    for (numButtonPresses <- 1 to Int.MaxValue) {
-      toVisit.enqueue((SequenceInitialModule, SequenceInitialModule, Pulse.LOW))
-
-      while (toVisit.nonEmpty) {
-        val (fromModuleId, toModuleId, pulse) = toVisit.dequeue()
-
-        if (fromModuleId == targetModuleId && pulse == Pulse.HIGH) {
-          return numButtonPresses.toLong
-        }
-
-        if (pulse == Pulse.LOW) {
-          lowPulses += 1
-        }
-        if (pulse == Pulse.HIGH) {
-          highPulses += 1
-        }
-
-        if (modules.contains(toModuleId) && pulse != Pulse.NONE) {
-          val module = modules(toModuleId)
-          val output = module.applyPulse(fromModuleId, pulse)
-
-          module.outputs.foreach(targetModule => {
-            toVisit.enqueue((toModuleId, targetModule, output))
-          })
-        }
+      if (numButtonPresses.isDefined && buttonPress == numButtonPresses.get) {
+        return lowPulses * highPulses
       }
     }
 
     throw new Error("Failed to find a solution! :(")
   }
+
+  def findPredecessors(input: Array[String], targetId: String): Array[String] = input
+    .map {
+      case s"&$predecessorId -> $target" if target == targetId => Some(predecessorId)
+      case _                                                   => None
+    }
+    .filter(_.isDefined)
+    .map(_.get)
 }
