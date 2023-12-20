@@ -36,13 +36,14 @@ object Day20 {
 
     override def applyPulse(from: String, input: Pulse): Pulse = input match {
       case Pulse.HIGH => Pulse.NONE
-      case Pulse.LOW => if (isOn) {
-        isOn = false
-        Pulse.LOW
-      } else {
-        isOn = true
-        Pulse.HIGH
-      }
+      case Pulse.LOW =>
+        if (isOn) {
+          isOn = false
+          Pulse.LOW
+        } else {
+          isOn = true
+          Pulse.HIGH
+        }
       case other => other
     }
   }
@@ -88,11 +89,12 @@ object Day20 {
 
     modules.map {
       case ("Stateless", moduleName) => moduleName -> StatelessModule(moduleOutputs(moduleName))
-      case ("FlipFlop", moduleName) => moduleName -> FlipFlopModule(moduleOutputs(moduleName))
-      case ("Conjunction", moduleName) => moduleName -> ConjunctionModule(
-        moduleOutputs(moduleName),
-        moduleInputs(moduleName).toArray
-      )
+      case ("FlipFlop", moduleName)  => moduleName -> FlipFlopModule(moduleOutputs(moduleName))
+      case ("Conjunction", moduleName) =>
+        moduleName -> ConjunctionModule(
+          moduleOutputs(moduleName),
+          moduleInputs(moduleName).toArray
+        )
     }.toMap
   }
 
