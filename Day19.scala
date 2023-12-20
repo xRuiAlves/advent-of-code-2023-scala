@@ -29,7 +29,12 @@ object Day19 {
       .filter(_._2 == true)
       .map(_._1.value)
       .sum
-    val part2 = evalWorkflows(workflows)
+    val part2 = evalWorkflows(workflows, StartWorkflowId, Array(
+      ('x', MinCategoryValue, MaxCategoryValue),
+      ('m', MinCategoryValue, MaxCategoryValue),
+      ('a', MinCategoryValue, MaxCategoryValue),
+      ('s', MinCategoryValue, MaxCategoryValue)
+    ))
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
@@ -132,39 +137,31 @@ object Day19 {
     }
     .filter(_._2 != -1)
 
-  def evalWorkflows(workflows: Map[String, Workflow]): Long = {
-    var validValues = 0L
-
-    def evalWorkflows(currWorkflowId: String, candidateRanges: Array[PartRange]): Unit = {
-      if (currWorkflowId == Accepted) {
-        validValues += candidateRanges.map { case (_, pi, pf) =>
-          (pf - pi + 1).toLong
-        }.product
-      } else if (currWorkflowId == Rejected) {} else {
-        var filteredRanges = candidateRanges
-
-        workflows(currWorkflowId).rules.foreach {
-          case RedirectRule(targetWorkflowId) => evalWorkflows(targetWorkflowId, filteredRanges)
-          case ComparisonRule(partSection, comparisonType, comparisonValue, targetWorkflow) =>
-            evalWorkflows(targetWorkflow, updatedRanges(filteredRanges, partSection, comparisonType, comparisonValue))
-            filteredRanges = comparisonType match {
-              case GreaterThan => updatedRanges(filteredRanges, partSection, LessThan, comparisonValue + 1)
-              case LessThan    => updatedRanges(filteredRanges, partSection, GreaterThan, comparisonValue - 1)
-            }
-        }
-      }
+  def evalWorkflows(
+      workflows: Map[String, Workflow],
+      currWorkflowId: String,
+      candidateRanges: Array[PartRange]
+  ): Long = {
+    if (currWorkflowId == Accepted) candidateRanges.map { case (_, pi, pf) =>
+      (pf - pi + 1).toLong
+    }.product
+    else if (currWorkflowId == Rejected) 0L
+    else {
+      var filteredRanges = candidateRanges
+      workflows(currWorkflowId).rules.map {
+        case RedirectRule(targetWorkflowId) => evalWorkflows(workflows, targetWorkflowId, filteredRanges)
+        case ComparisonRule(partSection, comparisonType, comparisonValue, targetWorkflow) =>
+          val res = evalWorkflows(
+            workflows,
+            targetWorkflow,
+            updatedRanges(filteredRanges, partSection, comparisonType, comparisonValue)
+          )
+          filteredRanges = comparisonType match {
+            case GreaterThan => updatedRanges(filteredRanges, partSection, LessThan, comparisonValue + 1)
+            case LessThan    => updatedRanges(filteredRanges, partSection, GreaterThan, comparisonValue - 1)
+          }
+          res
+      }.sum
     }
-
-    evalWorkflows(
-      StartWorkflowId,
-      Array(
-        ('x', MinCategoryValue, MaxCategoryValue),
-        ('m', MinCategoryValue, MaxCategoryValue),
-        ('a', MinCategoryValue, MaxCategoryValue),
-        ('s', MinCategoryValue, MaxCategoryValue)
-      )
-    )
-
-    validValues
   }
 }
