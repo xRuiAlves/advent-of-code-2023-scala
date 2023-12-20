@@ -19,6 +19,11 @@ object Day20 {
 
     val part1 = applySequence(parseModules(input), Part1NumButtonPresses)
 
+    // After manually debugging the input, I've noticed that the part 2 target "rx" module acts as a sink in a flow graph
+    // fed by 4 different Conjunction modules. For it to get a "Low" pulse as an input, all the modules that feed into
+    // it must be fed a "High" pulse. Thus, I am finding the frequency at which these modules get a "High" pulse, and
+    // then getting the least common multiple of their frequencies to find out in which button push they would all be
+    // "High", and thus feeding the "rx" module a "Low" pulse!
     val part2TargetModulePredecessor = findPredecessors(input, Part2SequenceTargetModule).head
     val part2LcmSinks = findPredecessors(input, part2TargetModulePredecessor)
     val part2 = lcm(part2LcmSinks.map(sinkModuleId => applySequence(parseModules(input), sinkModuleId)))
