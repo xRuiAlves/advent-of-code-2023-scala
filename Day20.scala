@@ -1,9 +1,11 @@
 //> using scala "3.3.0"
 //> using jvm "temurin:17"
 //> using file util/ResourceUtils.scala
+//> using file util/MathUtils.scala
 //> using resourceDir inputs
 
 import util.ResourceUtils.readResourceLines
+import util.MathUtils.lcm
 
 import scala.collection.mutable
 
@@ -13,9 +15,16 @@ object Day20 {
 
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day20.txt")
-    val modules = parseModules(input)
 
-    val part2 = applySequence(modules)
+    val part1 = applySequencePart1(parseModules(input))
+    val part2 = lcm(Array(
+      applySequencePart2(parseModules(input), "kl"),
+      applySequencePart2(parseModules(input), "vm"),
+      applySequencePart2(parseModules(input), "kv"),
+      applySequencePart2(parseModules(input), "vb")
+    ))
+
+    println(s"Part 1: $part1")
     println(s"Part 2: $part2")
   }
 
@@ -98,23 +107,51 @@ object Day20 {
     }.toMap
   }
 
-  def applySequence(modules: Map[String, Module]): (Int, Int) = {
+  def applySequencePart1(modules: Map[String, Module]): Int = {
     var lowPulses = 0
     var highPulses = 0
     val toVisit = mutable.Queue[(String, String, Pulse)]()
 
-    for (numButtonPresses <- 1 to Int.MaxValue) {
-      if (numButtonPresses == 1000) {
-        println(s"Part 1: ${lowPulses * highPulses}")
-      }
-
+    for (_ <- 1 to 1000) {
       toVisit.enqueue((SequenceInitialModule, SequenceInitialModule, Pulse.LOW))
 
       while (toVisit.nonEmpty) {
         val (fromModuleId, toModuleId, pulse) = toVisit.dequeue()
 
-        if (toModuleId == SequenceTargetModule && pulse == Pulse.LOW) {
-          return numButtonPresses
+        if (pulse == Pulse.LOW) {
+          lowPulses += 1
+        }
+        if (pulse == Pulse.HIGH) {
+          highPulses += 1
+        }
+
+        if (modules.contains(toModuleId) && pulse != Pulse.NONE) {
+          val module = modules(toModuleId)
+          val output = module.applyPulse(fromModuleId, pulse)
+
+          module.outputs.foreach(targetModule => {
+            toVisit.enqueue((toModuleId, targetModule, output))
+          })
+        }
+      }
+    }
+
+    lowPulses * highPulses
+  }
+
+  def applySequencePart2(modules: Map[String, Module], targetModuleId: String): Long = {
+    var lowPulses = 0
+    var highPulses = 0
+    val toVisit = mutable.Queue[(String, String, Pulse)]()
+
+    for (numButtonPresses <- 1 to Int.MaxValue) {
+      toVisit.enqueue((SequenceInitialModule, SequenceInitialModule, Pulse.LOW))
+
+      while (toVisit.nonEmpty) {
+        val (fromModuleId, toModuleId, pulse) = toVisit.dequeue()
+
+        if (fromModuleId == targetModuleId && pulse == Pulse.HIGH) {
+          return numButtonPresses.toLong
         }
 
         if (pulse == Pulse.LOW) {
