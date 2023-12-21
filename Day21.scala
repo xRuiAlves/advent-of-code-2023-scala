@@ -48,8 +48,8 @@ object Day21 {
     (i, j + 1),
     (i - 1, j),
     (i + 1, j)
-  ).filter {
-    case (ni, nj) => isInBounds(map, ni, nj) && map(ni)(nj) == Garden
+  ).filter { case (ni, nj) =>
+    isInBounds(map, ni, nj) && map(ni)(nj) == Garden
   }
 
   def getGardenTwoStepNeighbors(map: Map, coord: Coord2D): Set[Coord2D] =
