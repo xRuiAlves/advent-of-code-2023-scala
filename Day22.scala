@@ -35,11 +35,12 @@ object Day22 {
 
   object Brick {
     def fromStr(rawBrickLine: String): Brick = Brick((rawBrickLine match
-      case s"$x0,$y0,$z0~$x1,$y1,$z1" => for {
-        x <- x0.toInt to x1.toInt
-        y <- y0.toInt to y1.toInt
-        z <- z0.toInt to z1.toInt
-      } yield Coord3D(x, y, z)
+      case s"$x0,$y0,$z0~$x1,$y1,$z1" =>
+        for {
+          x <- x0.toInt to x1.toInt
+          y <- y0.toInt to y1.toInt
+          z <- z0.toInt to z1.toInt
+        } yield Coord3D(x, y, z)
     ).toSet)
   }
 
