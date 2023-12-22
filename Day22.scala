@@ -19,7 +19,7 @@ object Day22 {
     )
 
     val part1 = fallenBricksCounts.count(_ == 0)
-    val part2 = 0
+    val part2 = fallenBricksCounts.sum
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
