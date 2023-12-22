@@ -87,6 +87,12 @@ object Day21 {
   // I'm a bit at loss at why this works, but after way too many off-by-(a few) errors, I managed to get the right value
   // Got some inspiration from Reddit in regards to the use of the polynomial interpolation, but I still think there's something
   // off with my formula, although I can't put my finger on what it might be 🤷
+  //
+  // Edit: I also believe this only works due to a property (or two) I noticed on my input:
+  // - The line and column of the start position are empty (only gardens, no rocks);
+  // - The lines and columns at the border of the input are all empty (only gardens, no rocks).
+  // This makes it so that the "infinite" map expansion is replicated in an exactly "mirrorable" manner, which I believe is what
+  // enables the interpolation to work!
   def interpolation(
       visited: Set[VisitNode],
       mapSize: Int,
