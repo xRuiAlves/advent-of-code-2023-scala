@@ -83,7 +83,7 @@ object Day21 {
 
   // https://en.wikipedia.org/wiki/Polynomial_interpolation
   // I'm a bit at loss at why this works, but after way too many off-by-(a few) errors, I managed to get the right value
-  // Got some inspiration from Reddit in regards to the use of the polynomial interplation, but I still think there's something
+  // Got some inspiration from Reddit in regards to the use of the polynomial interpolation, but I still think there's something
   // off with my formula, although I can't put my finger on what it might be 🤷
   def interpolation(visited: Set[VisitNode], mapSize: Int, interpolationIndexes: IndexedSeq[Int], numSteps: Int): Long = {
     val interpolationPoints = interpolationIndexes.map(i => visited.count(_.depth == i).toLong)
