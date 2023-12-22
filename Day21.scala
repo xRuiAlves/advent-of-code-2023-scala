@@ -72,7 +72,9 @@ object Day21 {
 
       if (!visited.contains(curr) && curr.depth <= targetDepth) {
         visited.addOne(curr)
-        getGardenNeighbors(gardens, mapSize, curr.coord).foreach(neighbor => toVisit.enqueue(VisitNode(neighbor, curr.depth + 1)))
+        getGardenNeighbors(gardens, mapSize, curr.coord).foreach(neighbor =>
+          toVisit.enqueue(VisitNode(neighbor, curr.depth + 1))
+        )
       }
     }
 
@@ -85,7 +87,12 @@ object Day21 {
   // I'm a bit at loss at why this works, but after way too many off-by-(a few) errors, I managed to get the right value
   // Got some inspiration from Reddit in regards to the use of the polynomial interpolation, but I still think there's something
   // off with my formula, although I can't put my finger on what it might be 🤷
-  def interpolation(visited: Set[VisitNode], mapSize: Int, interpolationIndexes: IndexedSeq[Int], numSteps: Int): Long = {
+  def interpolation(
+      visited: Set[VisitNode],
+      mapSize: Int,
+      interpolationIndexes: IndexedSeq[Int],
+      numSteps: Int
+  ): Long = {
     val interpolationPoints = interpolationIndexes.map(i => visited.count(_.depth == i).toLong)
 
     val a = interpolationPoints(0)
