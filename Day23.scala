@@ -11,8 +11,7 @@ import scala.collection.mutable
 object Day23 {
   type Map = Array[Array[Char]]
   type Coord2D = (Int, Int)
-  type GraphEdge = (Coord2D, Int)
-  type Graph = mutable.Map[Coord2D, Array[GraphEdge]]
+  type Graph = mutable.Map[Coord2D, mutable.Map[Coord2D, Int]]
 
   private[this] final val Path = '.'
   private[this] final val Forest = '#'
@@ -23,24 +22,18 @@ object Day23 {
 
   def main(args: Array[String]): Unit = {
     val input = readResourceLines("day23.txt")
-    val map = input.map(_.toCharArray)
-    val graph = buildGraph(map)
-    val start = (0, map.head.indexWhere(_ == Path))
-    val end = (map.length - 1, map.last.indexWhere(_ == Path))
+    val mapPart1 = input.map(_.toCharArray)
+    val graphPart1 = buildGraph(mapPart1)
+    val mapPart2 = cleanupSlopes(input.map(_.toCharArray))
+    val graphPart2 = buildGraph(mapPart2)
+    val start = (0, mapPart1.head.indexWhere(_ == Path))
+    val end = (mapPart1.length - 1, mapPart1.last.indexWhere(_ == Path))
 
-    val part1 = visit(graph, start, end)
-    val part2 = 0
+    val part1 = visit(graphPart1, start, end)
+    val part2 = visit(graphPart2, start, end)
 
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
-  }
-
-  def buildGraph(map: Map): Graph = {
-    val graph = mutable.Map[Coord2D, Array[GraphEdge]]()
-    for (i <- map.indices; j <- map(i).indices) if (isInBounds(map, i, j) && map(i)(j) != Forest) {
-      graph((i, j)) = getNeighbors(map, i, j).map(coord => (coord, 1))
-    }
-    graph
   }
 
   def isInBounds(map: Map, i: Int, j: Int): Boolean =
@@ -84,4 +77,34 @@ object Day23 {
 
     largestPath
   }
+
+  def buildGraph(map: Map): Graph = {
+    val graph = mutable.Map[Coord2D, mutable.Map[Coord2D, Int]]()
+    for (i <- map.indices; j <- map(i).indices) if (isInBounds(map, i, j) && map(i)(j) != Forest) {
+      graph((i, j)) = mutable.Map[Coord2D, Int]()
+      getNeighbors(map, i, j).foreach(neighbor => graph((i, j))(neighbor) = 1)
+    }
+
+    @tailrec
+    def cleanupGraph(): Unit = graph.find(_._2.size == 2) match {
+      case Some((coord, neighbors)) =>
+        val Array(neighborA, neighborB) = neighbors.keys.toArray
+        val newEdge = graph(coord)(neighborA) + graph(coord)(neighborB)
+        graph.remove(coord)
+        graph(neighborA).remove(coord)
+        graph(neighborB).remove(coord)
+        graph(neighborA)(neighborB) = newEdge
+        graph(neighborB)(neighborA) = newEdge
+        cleanupGraph()
+      case None =>
+    }
+
+    cleanupGraph()
+    graph
+  }
+
+  def cleanupSlopes(map: Map): Map = map.map(_.map {
+    case Forest => Forest
+    case _      => Path
+  })
 }
