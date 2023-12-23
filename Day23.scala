@@ -27,7 +27,6 @@ object Day23 {
     val part1 = visit(map, start)
     val part2 = 0
 
-    println(map.length)
     println(s"Part 1: $part1")
     println(s"Part 2: $part2")
   }
@@ -64,25 +63,11 @@ object Day23 {
 
       if (curr._1 == map.length - 1) {
         largestPath = math.max(largestPath, visited.size)
-        println("---")
-        println("---")
-        println(s"largestPath = ${largestPath}")
-        println("---")
-        println("---")
       } else {
-        println(s"At $curr with ${visited.size} nodes visited")
-        println("Neighbors:")
-        val neighbors = getNeighbors(map, curr)
-        neighbors.foreach(x => println(s"\t$x"))
-
-        println("After filtering from visited:")
-        val neighborsFiltered = neighbors.filterNot(neighbor => visited.contains(neighbor))
-        neighborsFiltered.foreach(x => println(s"\t$x"))
-        toVisit.enqueueAll(
-          neighborsFiltered
-            .map(neighbor => VisitNode(neighbor, visited + curr))
+        toVisit.enqueueAll(getNeighbors(map, curr)
+          .filterNot(neighbor => visited.contains(neighbor))
+          .map(neighbor => VisitNode(neighbor, visited + curr))
         )
-        println()
       }
     }
 
