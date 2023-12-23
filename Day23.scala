@@ -68,9 +68,10 @@ object Day23 {
       if (curr == end) {
         largestPath = math.max(largestPath, dist)
       } else {
-        toVisit.enqueueAll(graph(curr)
-          .filterNot(graphEdge => visited.contains(graphEdge._1))
-          .map(graphEdge => VisitNode(graphEdge._1, dist + graphEdge._2, visited + curr))
+        toVisit.enqueueAll(
+          graph(curr)
+            .filterNot(graphEdge => visited.contains(graphEdge._1))
+            .map(graphEdge => VisitNode(graphEdge._1, dist + graphEdge._2, visited + curr))
         )
       }
     }
