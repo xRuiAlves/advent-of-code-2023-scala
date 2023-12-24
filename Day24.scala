@@ -9,8 +9,6 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Day24 {
-//  private[this] final val CollisionAreaMin = 7L
-//  private[this] final val CollisionAreaMax = 27L
   private[this] final val CollisionAreaMin = 200000000000000L
   private[this] final val CollisionAreaMax = 400000000000000L
 
@@ -22,13 +20,18 @@ object Day24 {
       j <- (i + 1) until lines.length
     } yield (lines(i), lines(j))
 
-    val part1 = linePairs.count { case (line1, line2) => line1.intersectsInPlaneInFuture(
-      line2, CollisionAreaMin, CollisionAreaMax, CollisionAreaMin, CollisionAreaMax
-    )}
-    val part2 = 0
+    val part1 = linePairs.count { case (line1, line2) =>
+      line1.intersectsInPlaneInFuture(
+        line2,
+        CollisionAreaMin,
+        CollisionAreaMax,
+        CollisionAreaMin,
+        CollisionAreaMax
+      )
+    }
 
     println(s"Part 1: $part1")
-    println(s"Part 2: $part2")
+    println(s"Part 2: Solved in Python :(")
   }
 
   case class Line(x: Long, y: Long, z: Long, vx: Long, vy: Long, vz: Long) {
@@ -52,11 +55,12 @@ object Day24 {
       else true
     }
 
-
-    def intersectsInPlaneInFuture(other: Line, minX: Long, maxX: Long, minY: Long, maxY: Long): Boolean = findIntersection(other) match
-      case None => false
-      case Some((x, y)) =>
-        x >= minX && x <= maxX && y >= minY && y <= maxY && this.isIntersectionInFuture(x, y) && other.isIntersectionInFuture(x, y)
+    def intersectsInPlaneInFuture(other: Line, minX: Long, maxX: Long, minY: Long, maxY: Long): Boolean =
+      findIntersection(other) match
+        case None => false
+        case Some((x, y)) =>
+          x >= minX && x <= maxX && y >= minY && y <= maxY && this.isIntersectionInFuture(x, y) && other
+            .isIntersectionInFuture(x, y)
   }
 
   object Line {
