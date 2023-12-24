@@ -14,18 +14,13 @@ def parseInput():
     return positions, velocities
 
 def solveEquation(positions, velocities):
-    x = z3.Real('x')
-    y = z3.Real('y')
-    z = z3.Real('z')
-    vx = z3.Real('vx')
-    vy = z3.Real('vy')
-    vz = z3.Real('vz')
+    [x, y, z, vx, vy, vz] = map(z3.Real, ["x", "y", "z", "vx", "vy", "vz"])
     solver = z3.Solver()
 
     for i in range(len(positions)):
         xI, yI, zI = positions[i]
         vxI, vyI, vzI = velocities[i]
-        tI = z3.Real(f"t_{i}")
+        tI = z3.Real(f"t{i}")
         solver.add(xI + vxI * tI == x + vx * tI)
         solver.add(yI + vyI * tI == y + vy * tI)
         solver.add(zI + vzI * tI == z + vz * tI)
@@ -36,7 +31,7 @@ def solveEquation(positions, velocities):
     return sum([res[x].as_long(), res[y].as_long(), res[z].as_long()])
 
 positions, velocities = parseInput()
-part2 = solveEquation(positions, velocities)
+part2 = solveEquation(positions[:3], velocities[:3])
 
 print(f"Part 1: Solved in Scala!")
 print(f"Part 2: {part2}")
