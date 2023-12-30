@@ -28,8 +28,8 @@ object Day25 {
       neighbors.split(" ").foreach(nodes.addOne)
     }
 
-    val nodeIndexes = nodes.toArray.zipWithIndex.map {
-      case (nodeName, id) => nodeName -> id
+    val nodeIndexes = nodes.toArray.zipWithIndex.map { case (nodeName, id) =>
+      nodeName -> id
     }.toMap
 
     val graph = Array.ofDim[Int](nodes.size, nodes.size)
@@ -78,7 +78,8 @@ object Day25 {
         contractions(s).addAll(contractions(t))
         graph.head(t) = Int.MinValue
 
-        getGroupSize(phase + 1,
+        getGroupSize(
+          phase + 1,
           if (candidateCut.size < bestCut.size) candidateCut
           else bestCut
         )
